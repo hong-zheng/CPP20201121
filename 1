@@ -1,0 +1,118 @@
+#define _CRT_SECURE_NO_WARNINGS 1
+#include <iostream>
+#include <ctime>
+using namespace std;
+
+void swap(int* arr, int left, int right){
+	int tmp = arr[left];
+	arr[left] = arr[right];
+	arr[right] = tmp;
+}
+
+// 小堆的向下调整
+void shiftDown(int* arr, int len, int parent){
+	int child  = 2 * parent + 1;
+
+	// 孩子节点位置不越界
+	while (child < len){
+		if (child + 1 < len && arr[child + 1] < arr[child])
+			++child;
+		if (arr[child] < arr[parent]){
+			swap(arr, child, parent);
+			parent = child;
+			child = 2 * parent + 1;
+		}
+		else{ // 孩子是大于或者等于父亲节点的值
+			break;
+		}
+	}
+}
+
+// 小堆
+void shiftUp(int* arr, int len, int child){
+	int parent = (child - 1) / 2;
+
+	while (parent >= 0){
+		if (arr[parent] > arr[child]){
+			swap(arr, parent, child);
+			child = parent;
+			parent = (child - 1) / 2;
+		}
+		else{
+			break;
+		}
+	}
+
+}
+
+void buildHeap(int* arr, int len){
+	// 最后一个非叶子节点位置 (size-2)/2
+	for (int parent = (len - 2) / 2; parent >= 0; --parent){
+		shiftDown(arr, len, parent);
+	}
+}
+
+void buildHeap1(int* arr, int len){
+	for (int child = 1; child < len; ++child){
+		shiftUp(arr, len, child);
+	}
+}
+
+// 堆：插入
+// 改变堆：改变的是一个一维数组，因此需要传二级指针才能修改其中的值
+void push_heap(int** arr, int len, int val){
+	// 检查容量
+	//  容量不足则进行扩容
+	// 此处没有封装因此必须扩容
+	len++;
+	*arr = (int*)realloc(*arr, len*sizeof(int));
+	(*arr)[len - 1] = val;
+	shiftUp(*arr, len,len-1);
+}
+
+// 堆的删除
+// 堆的删除就是删除最值：只有删除其具有特殊性质的操作才有意义
+// 删除根
+void heap_pop(int** arr, int len){
+	// 1.交换最后位置的值与根的值
+	swap(*arr, 0, len - 1);
+	// 2.对根进行向下调整
+	// 3.删除之后，堆中的元素少一个
+	--len;
+	shiftDown(*arr, len, 0);
+}
+
+void test(){
+	int num;
+	cin >> num;
+	int* nums = new int[num];
+	int i;
+	for (i = 0; i < num; ++i)
+		nums[i] = rand() % 100;
+	for (i = 0; i < num; ++i)
+		cout << nums[i] << " ";
+	cout << std::endl;
+	buildHeap1(nums, num);
+	for (i = 0; i < num; ++i)
+		cout << nums[i] << " ";
+	cout << endl;
+	int*  tmp;
+	int val = 10;
+	printf("before %p\n", nums);
+	push_heap(&nums, num, val);
+	printf("after %p\n", nums);
+	for (i = 0; i < num+1; ++i)
+		cout << nums[i] << " ";
+	cout << endl;
+	heap_pop(&nums, num);
+	for (i = 0; i < num-1; ++i){
+		cout << nums[i] << " ";
+	}
+	cout << endl;
+}
+
+int main(){
+	test();
+	system("pause");
+	return 0;
+}
